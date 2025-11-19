@@ -39,7 +39,10 @@ def registracija():
 @app.route('/registracija-submit/')
 def registracija_submit():
     uporabnisko_ime = request.args.get("username")
-    geslo = request.args.get("geslo")
+    if len(request.args.get("geslo")) <= 6:
+        return render_template("registracija.html", info_text = "Geslo mora biti daljše od 6 znakov")
+    geslo = request.args.get("geslo") 
+    
 
     insert_command = 'INSERT INTO contacts(first_name, last_name) VALUES("'+uporabnisko_ime+'", "'+geslo+'");'
     print(insert_command)
@@ -76,8 +79,9 @@ def add_note_submit():
         return redirect("/prijava/")
 
     note_text = request.args.get("note")
-    note_text = note_text.replace('"', "'")  # Sanitize input to avoid breaking the query
-
+    #prepreci xss injection
+    note_text = note_text.replace("<", "&lt;").replace(">", "&gt;")
+    
     conn = sqlite3.connect("test.db")
     cursor = conn.cursor()
     insert_command = 'INSERT INTO notes(username, note_text) VALUES("'+username+'", "'+note_text+'")'
